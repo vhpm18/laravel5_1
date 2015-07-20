@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
-use Illuminate\Http\Request;
-use Validator;
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\ThrottlesLogins;
+use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Foundation\Auth\ThrottlesLogins;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Validator;
 
 class AuthController extends Controller
 {
 
-    protected $username = 'username';
     /*
     |--------------------------------------------------------------------------
     | Registration & Login Controller
@@ -66,7 +66,15 @@ class AuthController extends Controller
         ]);
 
         $user->role = 'user';
+        $user->registration_token = str_random(40);
         $user->save();
+
+        $url = route('confirmation', ['token' => $user->registration_token]);
+
+        Mail::send('emails/registration', compact('user', 'url'), function ($m) use ($user) {
+            $m->to($user->email, $user->name)->subject('Activa tu cuenta!');
+        });
+
         return $user;
     }
 
@@ -99,10 +107,44 @@ class AuthController extends Controller
     protected function getCredentials(Request $request)
     {
         return [
-            'username' => $request->get('username'),
+//            'username' => $request->get('username'),
             'password' => $request->get('password'),
+            'email' => $request->get('email'),
+            'registration_token' => null,
             'active' => true
         ];
+    }
+
+    /**
+     * Handle a registration request for the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function postRegister(Request $request)
+    {
+        $validator = $this->validator($request->all());
+
+        if ($validator->fails()) {
+            $this->throwValidationException(
+                $request, $validator
+            );
+        }
+
+        $user = ($this->create($request->all()));
+
+        return redirect()->route('login')
+            ->with('alert', 'Por favor confirma tu email: '. $user->name);
+    }
+
+    protected function getConfirmation($token)
+    {
+        $user = User::where('registration_token', $token)->firstOrFail();
+        $user->registration_token = null;
+        $user->save();
+
+        return redirect()->route('login')
+            ->with('alert', 'Email confirmado, ahora puedes iniciar sesión!');
     }
 
 }
