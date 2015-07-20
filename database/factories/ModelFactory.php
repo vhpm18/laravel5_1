@@ -19,7 +19,6 @@ $factory->define(App\User::class, function ($faker) {
         'password' => bcrypt(str_random(10)),
         'remember_token' => str_random(10),
         'active' => $faker->boolean,
-        'role' => $faker->randomElement(['user', 'editor',
-        ])
+        'role' => $faker->randomElement(['user', 'editor'])
     ];
 });
