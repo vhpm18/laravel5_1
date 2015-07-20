@@ -33,7 +33,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest', ['except' => 'getLogout']);
+        $this->middleware('guest', ['except' => ['getLogout', 'getConfirmation']]);
     }
 
     /**
@@ -110,7 +110,7 @@ class AuthController extends Controller
 //            'username' => $request->get('username'),
             'password' => $request->get('password'),
             'email' => $request->get('email'),
-            'registration_token' => null,
+//            'registration_token' => null,
             'active' => true
         ];
     }
@@ -143,8 +143,8 @@ class AuthController extends Controller
         $user->registration_token = null;
         $user->save();
 
-        return redirect()->route('login')
-            ->with('alert', 'Email confirmado, ahora puedes iniciar sesión!');
+        return redirect()->route('home')
+            ->with('alert', '¡Tu email ya fué confirmado!');
     }
 
 }

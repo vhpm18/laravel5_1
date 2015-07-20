@@ -57,5 +57,17 @@ Route::group(['middleware' => 'auth'], function () {
         return view('account');
     });
 
+    Route::group(['middleware' => 'verified'], function () {
+
+        Route::get('publish', function () {
+            return view('publish');
+        });
+
+        Route::post('publish', function () {
+            return dd(Request::all());
+        });
+
+    });
+
 });
 

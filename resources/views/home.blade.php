@@ -7,6 +7,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">Home</div>
                     <div class="panel-body">
+                        @include('partials/success')
                         <p>Welcome to our site!</p>
                     </div>
                 </div>
